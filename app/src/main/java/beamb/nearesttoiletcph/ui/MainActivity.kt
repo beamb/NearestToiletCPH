@@ -93,12 +93,6 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         }
-
-        if (isNetworkConnected() && isLocationEnabled()) {
-            toiletRetriever.getToilets(callback)
-        } else {
-            displayErrorMessage()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -159,15 +153,24 @@ class MainActivity : AppCompatActivity() {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
             return
         }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    mCurrentLocation = location
-                    Log.i("MainActivity", mCurrentLocation.toString())
-                } else {
-                    displayErrorMessage()
-                }
+        if (this::mCurrentLocation.isInitialized) {
+            if (isNetworkConnected() && isLocationEnabled()) {
+                toiletRetriever.getToilets(callback)
+            } else {
+                displayErrorMessage(1)
             }
+        } else {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (location != null) {
+                        mCurrentLocation = location
+                        toiletRetriever.getToilets(callback)
+                        Log.i("MainActivity", mCurrentLocation.toString())
+                    } else {
+                        displayErrorMessage(1)
+                    }
+                }
+        }
     }
 
     /*private fun getCurrentLocation() {
@@ -197,20 +200,39 @@ class MainActivity : AppCompatActivity() {
         return location
     }
 
-    private fun displayErrorMessage() {
-        mBuilder.setMessage(
-            R.string.share_location
-        )
-            .setCancelable(false)
-            .setPositiveButton(
-                "Ok"
-            ) { dialog, _ ->
-                dialog.cancel()
+    private fun displayErrorMessage(code: Int) {
+        when (code) {
+            0 -> {
+                mBuilder.setMessage(
+                    R.string.refresh_location
+                )
+                    .setCancelable(false)
+                    .setPositiveButton(
+                        "Ok"
+                    ) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                val alert = mBuilder.create()
+                alert.setTitle("Oops!")
+                alert.setIcon(android.R.drawable.ic_dialog_alert)
+                alert.show()
             }
-        val alert = mBuilder.create()
-        alert.setTitle("Oops!")
-        alert.setIcon(android.R.drawable.ic_dialog_alert)
-        alert.show()
+            1 -> {
+                mBuilder.setMessage(
+                    R.string.share_location
+                )
+                    .setCancelable(false)
+                    .setPositiveButton(
+                        "Ok"
+                    ) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                val alert = mBuilder.create()
+                alert.setTitle("Oops!")
+                alert.setIcon(android.R.drawable.ic_dialog_alert)
+                alert.show()
+            }
+        }
     }
 
     private fun findClosestToilet(b: ArrayList<Properties>?): Properties? {
@@ -246,11 +268,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        getLocation()
-//        startLocationUpdates()
+        startLocationUpdates()
     }
 
-    /*private fun startLocationUpdates() {
+    private fun startLocationUpdates() {
         val locationRequest = LocationRequest.create().apply {
             interval = 10000
             fastestInterval = 5000
@@ -270,7 +291,7 @@ class MainActivity : AppCompatActivity() {
             locationCallback,
             Looper.getMainLooper()
         )
-    }*/
+    }
 
     private fun isNetworkConnected(): Boolean {
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
