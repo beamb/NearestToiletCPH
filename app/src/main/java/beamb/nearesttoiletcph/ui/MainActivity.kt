@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                         toiletRetriever.getToilets(callback)
                         Log.i("MainActivity", mCurrentLocation.toString())
                     } else {
-                        displayErrorMessage(1)
+                        displayErrorMessage(0)
                     }
                 }
         }
@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
                     mCurrentLocation = location
                     Log.i("MainActivity", mCurrentLocation.toString())
                 } else {
-                    displayErrorMessage()
+                    displayErrorMessage(0)
                 }
             }
     }*/
