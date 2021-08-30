@@ -35,6 +35,10 @@ import kotlin.collections.ArrayList
 /** Nearest Toilet CPH is inspired by Jørgen Staunstrup's Nearest Toilet App - presented
  * in the Mobile App Development course at IT University of Copenhagen (Spring 2020 & Spring 2021).*/
 
+// TODO Mention coroutines
+// TODO Mention lack of version control
+// TODO Add refresh function -> getCurrentLocation()
+
 class MainActivity : AppCompatActivity() {
     // Finding nearest toilet in Copenhagen stand based on KK open data
 
@@ -113,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                         dialog.cancel()
                     }
                 val alert = mBuilder.create()
-                alert.setTitle("Opening hours (in Danish)")
+                alert.setTitle(mClosestToilet.toiletLocation + "\n" + "Opening hours:")
                 alert.show()
                 true
             }
@@ -250,7 +254,6 @@ class MainActivity : AppCompatActivity() {
                     closest = b[i]
                     min = temp
                 }
-
             }
             return closest
         }
@@ -307,7 +310,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getToiletInfo(): String {
-        return "<b>" + "Monday:" + "</b>" + "<br/>" +
+        return "<small>" + getString(R.string.toilet_info) + "</small>" +
+                "<br/>" +
+                "<small>" + "Latest update: " + mClosestToilet.lastUpdate + "</small>" +
+                "<br/>" + "<br/>" +
+        "<b>" + "Monday:" + "</b>" + "<br/>" +
                 mClosestToilet.monday + "<br/>" + "<br/>" +
                 "<b>" + "Tuesday:" + "</b>" + "<br/>" +
                 mClosestToilet.tuesday + "<br/>" + "<br/>" +
@@ -328,10 +335,6 @@ class MainActivity : AppCompatActivity() {
                     "<u>" + "Notes:" + "</u>" + "<br/>" + mClosestToilet.notes
                 } else {
                     ""
-                } +
-                "<br/>" + "<br/>" +
-                "<u>" + "Toilet location:" + "</u>" + "<br/>" + mClosestToilet.toiletLocation +
-                "<br/>" + "<br/>" + "<br/>" +
-                "<small>" + "Latest update: " + mClosestToilet.lastUpdate + "</small>"
+                }
     }
 }
