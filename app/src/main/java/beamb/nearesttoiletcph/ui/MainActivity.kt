@@ -24,23 +24,19 @@ import beamb.nearesttoiletcph.api.ToiletRetriever
 import beamb.nearesttoiletcph.data.Properties
 import beamb.nearesttoiletcph.data.ToiletResult
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.CancellationToken
-import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.*
 import kotlin.collections.ArrayList
 
-/** Nearest Toilet CPH is inspired by Jørgen Staunstrup's Nearest Toilet App - presented
+/** Nearest Toilet CPH is inspired by (jst) Jørgen Staunstrup's Nearest Toilet App - presented
  * in the Mobile App Development course at IT University of Copenhagen (Spring 2020 & Spring 2021).*/
 
 // TODO Mention coroutines
 // TODO Mention lack of version control
-// TODO Add refresh function -> getCurrentLocation()
 
 class MainActivity : AppCompatActivity() {
-    // Finding nearest toilet in Copenhagen stand based on KK open data
+    // Finding nearest toilet in Copenhagen based on KK open data
 
     private lateinit var mCurrentLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -99,55 +95,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.activity_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_info -> {
-                mBuilder.setMessage(
-                    Html.fromHtml(getToiletInfo(), Html.FROM_HTML_MODE_LEGACY)
-                )
-                    .setCancelable(false)
-                    .setPositiveButton(
-                        "Ok"
-                    ) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                val alert = mBuilder.create()
-                alert.setTitle(mClosestToilet.toiletLocation + "\n" + "Opening hours:")
-                alert.show()
-                true
-            }
-            R.id.menu_sync -> {
-                getLocation()
-                //getCurrentLocation()
-                mClosestToilet = findClosestToilet(toilets)!!
-                displayClosestToilet()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun startBrowser(
-        start: Location,
-        dest: Location
-    ) {
-        val url =
-            "https://maps.google.com?saddr=" + start.latitude + "," + start.longitude +
-                    "&daddr=" + dest.latitude + "," + dest.longitude + "&dirflg=w"
-        mWeb.loadUrl(url)
-    }
-
-    private fun displayClosestToilet() {
-        val closestToiletLocation =
-            getToiletLocation(mClosestToilet.latitude, mClosestToilet.longitude)
-        startBrowser(mCurrentLocation, closestToiletLocation)
-    }
-
     private fun getLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -157,13 +104,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
             return
         }
-        if (this::mCurrentLocation.isInitialized) {
-            if (isNetworkConnected() && isLocationEnabled()) {
-                toiletRetriever.getToilets(callback)
-            } else {
-                displayErrorMessage(1)
-            }
-        } else {
+        if (isNetworkConnected() && isLocationEnabled()) {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     if (location != null) {
@@ -174,68 +115,8 @@ class MainActivity : AppCompatActivity() {
                         displayErrorMessage(0)
                     }
                 }
-        }
-    }
-
-    /*private fun getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
-            return
-        }
-        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, CancellationToken())
-            .addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    mCurrentLocation = location
-                    Log.i("MainActivity", mCurrentLocation.toString())
-                } else {
-                    displayErrorMessage(0)
-                }
-            }
-    }*/
-
-    private fun getToiletLocation(lat: Double, long: Double): Location {
-        val location = Location("Toilet")
-        location.latitude = lat
-        location.longitude = long
-        return location
-    }
-
-    private fun displayErrorMessage(code: Int) {
-        when (code) {
-            0 -> {
-                mBuilder.setMessage(
-                    R.string.refresh_location
-                )
-                    .setCancelable(false)
-                    .setPositiveButton(
-                        "Ok"
-                    ) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                val alert = mBuilder.create()
-                alert.setTitle("Oops!")
-                alert.setIcon(android.R.drawable.ic_dialog_alert)
-                alert.show()
-            }
-            1 -> {
-                mBuilder.setMessage(
-                    R.string.share_location
-                )
-                    .setCancelable(false)
-                    .setPositiveButton(
-                        "Ok"
-                    ) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                val alert = mBuilder.create()
-                alert.setTitle("Oops!")
-                alert.setIcon(android.R.drawable.ic_dialog_alert)
-                alert.show()
-            }
+        } else {
+            displayErrorMessage(1)
         }
     }
 
@@ -262,6 +143,91 @@ class MainActivity : AppCompatActivity() {
 
     private fun distance(p1: Location, p2: Location): Double {
         return (p1.distanceTo(p2)).toDouble()
+    }
+
+    private fun displayClosestToilet() {
+        val closestToiletLocation =
+            getToiletLocation(mClosestToilet.latitude, mClosestToilet.longitude)
+        startBrowser(mCurrentLocation, closestToiletLocation)
+    }
+
+    private fun getToiletLocation(lat: Double, long: Double): Location {
+        val location = Location("Toilet")
+        location.latitude = lat
+        location.longitude = long
+        return location
+    }
+
+    private fun startBrowser(
+        start: Location,
+        dest: Location
+    ) {
+        val url =
+            "https://maps.google.com?saddr=" + start.latitude + "," + start.longitude +
+                    "&daddr=" + dest.latitude + "," + dest.longitude + "&dirflg=w"
+        mWeb.loadUrl(url)
+    }
+
+    private fun displayErrorMessage(code: Int) {
+        when (code) {
+            0 -> {
+                mBuilder.setMessage(
+                    R.string.refresh_location
+                )
+                    .setCancelable(false)
+                    .setPositiveButton(
+                        "Ok"
+                    ) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                .setTitle("Something went wrong…")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .create().show()
+            }
+            1 -> {
+                mBuilder.setMessage(
+                    R.string.share_location
+                )
+                    .setCancelable(false)
+                    .setPositiveButton(
+                        "Ok"
+                    ) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                .setTitle("Oops!")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .create().show()
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.activity_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_info -> {
+                mBuilder.setMessage(
+                    Html.fromHtml(getToiletInfo(), Html.FROM_HTML_MODE_LEGACY)
+                )
+                    .setCancelable(false)
+                    .setPositiveButton(
+                        "Ok"
+                    ) { dialog, _ ->
+                        dialog.cancel()
+                    }
+                .setTitle(mClosestToilet.toiletLocation + "\n" + "Opening hours:")
+                .create().show()
+                true
+            }
+            R.id.menu_sync -> {
+                getLocation()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onPause() {

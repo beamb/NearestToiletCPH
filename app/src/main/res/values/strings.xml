@@ -4,6 +4,6 @@
     <string name="menu_info">Details</string>
     <string name="menu_sync">Refresh</string>
     <string name="share_location">Make sure both your location and internet connection are enabled before restarting the app.</string>
-    <string name="refresh_location">Something went wrong with your location. Try refreshing it by clicking on the refresh icon at the top.</string>
+    <string name="refresh_location">…with your location. Try refreshing it by clicking on the refresh icon at the top.</string>
     <string name="toilet_info">Currently all details are only available in Danish.</string>
 </resources>
