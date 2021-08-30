@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //TODO Look into this code
         mWeb = findViewById(R.id.webpage)
         mWeb.settings.javaScriptEnabled = true
         mWeb.webViewClient = object : WebViewClient() {
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Not a great function as it does 2 things - would be better with async/await
     private fun getLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -109,14 +111,25 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener { location: Location? ->
                     if (location != null) {
                         mCurrentLocation = location
-                        toiletRetriever.getToilets(callback)
+                        if (!this::toilets.isInitialized) {
+                            toiletRetriever.getToilets(callback)
+                        } else {
+                            mClosestToilet = findClosestToilet(toilets)!!
+                            displayClosestToilet()
+                        }
                         Log.i("MainActivity", mCurrentLocation.toString())
                     } else {
-                        displayErrorMessage(0)
+                        displayErrorMessage(
+                            getString(R.string.refresh_location_title),
+                            getString(R.string.refresh_location)
+                        )
                     }
                 }
         } else {
-            displayErrorMessage(1)
+            displayErrorMessage(
+                getString(R.string.share_location_title),
+                getString(R.string.share_location)
+            )
         }
     }
 
@@ -168,37 +181,17 @@ class MainActivity : AppCompatActivity() {
         mWeb.loadUrl(url)
     }
 
-    private fun displayErrorMessage(code: Int) {
-        when (code) {
-            0 -> {
-                mBuilder.setMessage(
-                    R.string.refresh_location
-                )
-                    .setCancelable(false)
-                    .setPositiveButton(
-                        "Ok"
-                    ) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                .setTitle("Something went wrong…")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .create().show()
+    private fun displayErrorMessage(title: String, message: String) {
+        mBuilder.setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton(
+                "Ok"
+            ) { dialog, _ ->
+                dialog.cancel()
             }
-            1 -> {
-                mBuilder.setMessage(
-                    R.string.share_location
-                )
-                    .setCancelable(false)
-                    .setPositiveButton(
-                        "Ok"
-                    ) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                .setTitle("Oops!")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .create().show()
-            }
-        }
+            .setTitle(title)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .create().show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -218,8 +211,8 @@ class MainActivity : AppCompatActivity() {
                     ) { dialog, _ ->
                         dialog.cancel()
                     }
-                .setTitle(mClosestToilet.toiletLocation + "\n" + "Opening hours:")
-                .create().show()
+                    .setTitle(mClosestToilet.toiletLocation + "\n" + "Opening hours:")
+                    .create().show()
                 true
             }
             R.id.menu_sync -> {
@@ -280,7 +273,7 @@ class MainActivity : AppCompatActivity() {
                 "<br/>" +
                 "<small>" + "Latest update: " + mClosestToilet.lastUpdate + "</small>" +
                 "<br/>" + "<br/>" +
-        "<b>" + "Monday:" + "</b>" + "<br/>" +
+                "<b>" + "Monday:" + "</b>" + "<br/>" +
                 mClosestToilet.monday + "<br/>" + "<br/>" +
                 "<b>" + "Tuesday:" + "</b>" + "<br/>" +
                 mClosestToilet.tuesday + "<br/>" + "<br/>" +
