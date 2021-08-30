@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="prim_200">#419BBF</color>
+    <color name="prim_500">#368ABF</color>
+    <color name="prim_700">#0D5B8C</color>
+    <color name="sec_200">#B8D9D9</color>
+    <color name="sec_700">#BF7969</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

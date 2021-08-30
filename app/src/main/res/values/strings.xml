@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NearestToiletCPH</string>
+    <string name="app_title">Your nearest toilet</string>
+    <string name="menu_info">Details</string>
+    <string name="menu_sync">Refresh</string>
+    <string name="share_location">Make sure both your location and internet connection are enabled before restarting the app.</string>
+</resources>
