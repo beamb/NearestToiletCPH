@@ -9,7 +9,6 @@ import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.os.Looper
 import android.text.Html
 import android.util.Log
 import android.view.Menu
@@ -32,7 +31,8 @@ import kotlin.collections.ArrayList
 /** Nearest Toilet CPH is inspired by (jst) Jørgen Staunstrup's Nearest Toilet App - presented
  * in the Mobile App Development course at IT University of Copenhagen (Spring 2020 & Spring 2021).*/
 
-// TODO Mention coroutines
+// TODO Mention lack of fragments & navigation graph
+// TODO Mention coroutines & async/await
 // TODO Mention lack of version control
 
 class MainActivity : AppCompatActivity() {
@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mCurrentLocation: Location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
     private lateinit var mClosestToilet: Properties
     private lateinit var mBuilder: AlertDialog.Builder
     private lateinit var mWeb: WebView
@@ -111,14 +110,14 @@ class MainActivity : AppCompatActivity() {
                         }
                         Log.i("MainActivity", mCurrentLocation.toString())
                     } else {
-                        displayErrorMessage(
+                        displayDialog(
                             getString(R.string.refresh_location_title),
                             getString(R.string.refresh_location)
                         )
                     }
                 }
         } else {
-            displayErrorMessage(
+            displayDialog(
                 getString(R.string.share_location_title),
                 getString(R.string.share_location)
             )
@@ -173,7 +172,7 @@ class MainActivity : AppCompatActivity() {
         mWeb.loadUrl(url)
     }
 
-    private fun displayErrorMessage(title: String, message: String) {
+    private fun displayDialog(title: String, message: CharSequence) {
         mBuilder.setMessage(message)
             .setCancelable(false)
             .setPositiveButton(
@@ -194,17 +193,10 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_info -> {
-                mBuilder.setMessage(
+                displayDialog(
+                    mClosestToilet.toiletLocation + "\n" + "Opening hours:",
                     Html.fromHtml(getToiletInfo(), Html.FROM_HTML_MODE_LEGACY)
                 )
-                    .setCancelable(false)
-                    .setPositiveButton(
-                        "Ok"
-                    ) { dialog, _ ->
-                        dialog.cancel()
-                    }
-                    .setTitle(mClosestToilet.toiletLocation + "\n" + "Opening hours:")
-                    .create().show()
                 true
             }
             R.id.menu_sync -> {
@@ -249,7 +241,6 @@ class MainActivity : AppCompatActivity() {
                 mClosestToilet.sunday + "<br/>" + "<br/>" +
                 "<br/>" +
                 "<b>" + "Open year-round: " + "</b>" + mClosestToilet.yearRoundHours + "<br/>" +
-                "<b>" + "Evening access: " + "</b>" + mClosestToilet.eveningAccess + "<br/>" +
                 if (mClosestToilet.notes != "0") {
                     "<u>" + "Notes:" + "</u>" + "<br/>" + mClosestToilet.notes
                 } else {

@@ -11,7 +11,6 @@ data class Features (
 data class Properties (
     @SerializedName("toilet_lokalitet") val toiletLocation : String,
     @SerializedName("helaarsaabent") val yearRoundHours : String,
-    @SerializedName("aftenlaasning") val eveningAccess : String,
     @SerializedName("mandag") val monday : String,
     @SerializedName("tirsdag") val tuesday : String,
     @SerializedName("onsdag") val wednesday : String,
