@@ -31,10 +31,6 @@ import kotlin.collections.ArrayList
 /** Nearest Toilet CPH is inspired by (jst) Jørgen Staunstrup's Nearest Toilet App - presented
  * in the Mobile App Development course at IT University of Copenhagen (Spring 2020 & Spring 2021).*/
 
-// TODO Mention lack of fragments & navigation graph
-// TODO Mention coroutines & async/await
-// TODO Mention lack of version control
-
 class MainActivity : AppCompatActivity() {
     // Finding nearest toilet in Copenhagen based on KK open data
 
@@ -77,7 +73,6 @@ class MainActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLocation()
 
-        //TODO Look into this code
         mWeb = findViewById(R.id.webpage)
         mWeb.settings.javaScriptEnabled = true
         mWeb.webViewClient = object : WebViewClient() {
@@ -87,7 +82,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Not a great function as it does 2 things - would be better with async/await
     private fun getLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
